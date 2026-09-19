@@ -15,7 +15,11 @@ class SandboxError(Exception):
 def _safe_path(repo_root: str, rel_path: str) -> Path:
     root = Path(repo_root).resolve()
     target = (root / rel_path).resolve()
-    if not str(target).startswith(str(root)):
+    try:
+        inside = os.path.commonpath([root, target]) == str(root)
+    except ValueError:
+        inside = False
+    if not inside:
         raise SandboxError(f"Path escapes repo root: {rel_path}")
     return target
 
